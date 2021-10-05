@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contactos</title>
+
+    <!-- CSS (load bootstrap from a CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/main.css">
+</head>
+<body class="container">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title"> <%- card.user.name %> {<%- card.name %>} </h5>
+            <p class="card-text">
+                <% card.contacts.forEach((contact) => { %>
+                    <a href="<%= contact.type.url %>">
+                        <h4 class="list-group-item-heading"><%= contact.type.name %> : <%= contact.value %> </h4>
+                    </a>
+                    <br>
+                <% }) %>
+            </p>
+            <a href="#" class="btn btn-primary">Metaceo</a>
+          </div>
+    </div>
+</body>
+</html>

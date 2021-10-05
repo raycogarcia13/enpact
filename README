@@ -1,0 +1,15 @@
+Aplication CT, Control of Time Working in projects for ENPA, STACK MEVN
+
+Backend:
+yarn install
+yarn dev
+
+
+Fronted:
+
+cd frontend
+yarn install
+yarn dev
+
+
+Autor: Rayco García Fernández
