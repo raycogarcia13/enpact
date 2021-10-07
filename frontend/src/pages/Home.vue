@@ -3,6 +3,7 @@
       <v-row class="mt-5">
         <v-col cols="" class="text-center">
         <h2>Control de tiempo trabajado en proyectos</h2>
+        <h2>{{sumHoursDay}}</h2>
         </v-col>
 
         <v-col cols="3" class="text-center">
@@ -201,6 +202,9 @@ export default {
       });
 
       return all;
+    },
+    sumHoursDay(){
+      return this.ct.reduce((count,item)=>{return count+item.cantHours},0)
     }
   },
   methods: {
@@ -223,8 +227,7 @@ export default {
               this.snack = true
               this.snackColor = 'success'
               this.snackText = 'Información guardada correctamente'
-              console.log(res.data.data);
-              // Object.assign(this.ct[this.ct.findIndex(t=>t._id == res.data.data._id)], res.data.data);
+              this.ct[this.ct.findIndex(t=>t._id == res.data.data._id)].cantHours = parseInt(data.cantHours)
               this.close()
             })
         }else
@@ -248,7 +251,7 @@ export default {
         this.snackText = 'Dialog opened'
       },
       close () {
-        console.log('Dialog closed')
+        // console.log('Dialog closed')
       },
       loadData(){
         let uri = '/ct'
