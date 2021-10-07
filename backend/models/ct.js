@@ -17,7 +17,10 @@ const dataSchema = new Schema({
     day: Number,
     month: Number,
     year: Number,
-    cantHours:Number
+    cantHours:{
+        type:Number,
+        required: [true, 'Debe insertar la cantidad de horas']
+    }
 });
 
-module.exports =  model('Project',dataSchema);
+module.exports =  model('ct',dataSchema);

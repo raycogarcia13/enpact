@@ -9,18 +9,17 @@
              <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
             <div class="d-flex align-center">
-               <v-app-bar-title>
-                CT-ENPA
-               </v-app-bar-title>
+                <v-btn plain to="/admin">
+                    <v-app-bar-title>
+                        CT-ENPA
+                    </v-app-bar-title>
+                </v-btn>
             </div>
 
             <v-spacer></v-spacer>
 
-            <v-btn plain>
-                Paco Alcacer
-                <v-avatar color="red" class="ml-1">
-                    <v-icon>mdi-account</v-icon>
-                </v-avatar>
+            <v-btn text>
+                {{user.name}}
             </v-btn>
         </v-app-bar>
 
@@ -42,7 +41,7 @@
                     <v-list-item-title>Servicios</v-list-item-title>
                 </v-list-item>
 
-                <v-list-item>
+                <v-list-item to="/actividades">
                     <v-list-item-title>Actividades no productivas</v-list-item-title>
                 </v-list-item>
 
@@ -73,12 +72,18 @@ export default {
         }
     },
     computed: {
-        ...mapState('app',['auth'])
+        ...mapState('app',['auth','user'])
+    },
+    methods: {
+        // ...mapActions('app',['hasRole']),
+
     },
     mounted() {
-        // if(!this.auth)
-            // this.$router.push('/login')
-        // console.log(this.auth)
+        if(!this.auth)
+            return this.$router.push('/login')
+        
+        if(!this.$hasRole('CTJefe') || !this.$hasRole('CTRHH'))
+            return this.$router.push('/')
     },
 }
 </script>

@@ -15,8 +15,8 @@
                 autocomplete
                 v-model="email"
                 name="email"
-                label="Correo"
-                append-icon="mdi-email"
+                label="Usuario"
+                append-icon="mdi-account"
               ></v-text-field>
               <v-text-field
                 solo
@@ -74,17 +74,19 @@ export default {
     ...mapActions('app', ['login','logout']),
     sendLogin(){
       let uri = 'login';
-      this.$axios.post(uri,{email:this.email,password:this.password}).then(res=>{
-        if(res.data.user.role == 'Admin'){
+      this.$axios.post(uri,{username:this.email,password:this.password}).then(res=>{
           this.login(res)
           this.$router.push('/')  
-        }else{
-          this.error = "Acceso denegado"
-        }
       }).catch(err => {
-        this.error = err.response.data.error
+        console.log(err)
+        // this.error = err.response.data.error
+        this.error = 'Credenciales erróneas'
       })
     }
+  },
+  beforeMount() {
+    if(this.auth)
+      this.$router.push('/')
   },
 };
 </script>

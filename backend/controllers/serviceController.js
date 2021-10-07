@@ -17,11 +17,26 @@ exports.get = catchAsyncErrors(async (req,res,next) =>{
         data: all
     })
 })
+//get services getMyservices => /api/v1/my_services
+exports.myServices = catchAsyncErrors(async (req,res,next) =>{
+    const { _id } = req.user.projector;
+    let all = await Services.find({finalDateR:null,deletedAt:null, team:_id})
+        .populate('project')
+        .populate('projectManager')
+        .populate({path:'team',populate:{path:'projector'}});
+    
+    res.json({
+        status:"success",
+        count: all.length,
+        data: all
+    })
+})
 // get all project  => /api/v1/department
 exports.all = catchAsyncErrors(async (req,res,next) =>{
     let all = await Services.find() 
         .populate('project')
-        .populate('projectManager');
+        .populate('projectManager')
+        .populate({path:'team',populate:{path:'projector'}});
     
     res.json({
         status:"success",
@@ -47,15 +62,10 @@ exports.find = catchAsyncErrors(async (req,res,next) =>{
 exports.store = catchAsyncErrors(async (req,res,next) =>{
     const data = await Services.create(req.body);
     
-    res.json({
-        status:"success",
-        data: data
-    })
-})
-// put insert a activities  => /api/v1/department
-exports.store = catchAsyncErrors(async (req,res,next) =>{
-    const data = await Services.create(req.body);
-    
+    await data.populate('project')
+        .populate('projectManager')
+        .populate({path:'team',populate:{path:'projector'}}).execPopulate();
+
     res.json({
         status:"success",
         data: data
@@ -73,6 +83,10 @@ exports.update = catchAsyncErrors(async (req,res,next) =>{
         runValidators:true,
         useFindAndModify: false
     });
+
+    await data.populate('project')
+        .populate('projectManager')
+        .populate({path:'team',populate:{path:'projector'}}).execPopulate();
 
     res.json({
         status:"success",

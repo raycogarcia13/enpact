@@ -11,7 +11,7 @@ exports.isAuthenticatedUser = catchAsyncErrors( async (req,res,next) => {
      
      const decoded = jwt.verify(token,process.env.JWT_SECRET)
      if(decoded){
-        req.user = await User.findById(decoded.id)
+        req.user = decoded.user
         next()
      }
     else
@@ -21,18 +21,19 @@ exports.isAuthenticatedUser = catchAsyncErrors( async (req,res,next) => {
 // checks if role auth
 exports.authorizeRoles = (...roles) =>{
     return (req, res, next)=>{
-        if(!roles.includes(req.user.role))
-        return next(new ErrorHandler(`Role (${req.user.role}) is not alowed to access ti this resource`,403))
+        if(req.user.roles.includes('Administradores')){
+            return next();
+        }
+
+        let allow = false;
+        roles.forEach(element => {
+            if(req.user.roles.includes(element))
+                allow = true;
+        });
+
+        if(!allow)
+            return next(new ErrorHandler(`User (${req.user.user}) is not alowed to access ti this resource`,403))
         
-        next();
-    }
-}
-// checks if role auth
-exports.authorizeRole = (role) =>{
-    return (req, res, next)=>{
-        if(!req.user.roles.includes(role))
-            return next(new ErrorHandler(`Role (${req.user.role}) is not alowed to access ti this resource`,403))
-        
-        next();
+        return next();
     }
 }

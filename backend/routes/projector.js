@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-const { all, find, getByDepartment , setDpto} = require('../controllers/projectorController')
+const { all, find, getByDepartment , setDpto, getOnly} = require('../controllers/projectorController')
 
-const { isAuthenticatedUser, authorizeRole } = require("../middlewares/auth")
+const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth")
 
-// router.get('/logout', isAuthenticatedUser, authorizeRole('Admin'), logout);
-router.get('/projector', all);
-router.get('/projector/:id', find);
-router.get('/projector/department/:id', getByDepartment);
-router.put('/projector/:id/department', setDpto);
+router.get('/projector',isAuthenticatedUser, all);
+router.get('/projector_only',isAuthenticatedUser, getOnly);
+router.get('/projector/:id',isAuthenticatedUser, find);
+router.get('/projector/department/:id',isAuthenticatedUser, getByDepartment);
+router.put('/projector/:id/department',isAuthenticatedUser,authorizeRoles('CTJefe'), setDpto);
 
 module.exports = router

@@ -23,8 +23,10 @@ app.use('/api/v1',require("./routes/department"));
 app.use('/api/v1',require("./routes/activity"));
 // projects
 app.use('/api/v1',require("./routes/project"));
-// projects
+// services
 app.use('/api/v1',require("./routes/services"));
+// ct
+app.use('/api/v1',require("./routes/ct"));
 
 // error middleware
 const errorMiddleware = require('./middlewares/errors')

@@ -34,6 +34,6 @@ export default  {
             state.auth = true;
             state.user = user
           }
-      },
+      }
     }
 }

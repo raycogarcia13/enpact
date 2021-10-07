@@ -4,7 +4,7 @@ const dataSchema = new Schema({
     activity:{
         type: Types.ObjectId,
         required: [true, 'Debe escoger la actividad'],
-        ref:"Activities"
+        ref:"Activity"
     },
     projector:{
         type: Types.ObjectId,
@@ -17,7 +17,10 @@ const dataSchema = new Schema({
     day: Number,
     month: Number,
     year: Number,
-    cantHours:Number
+    cantHours:{
+        type:Number,
+        required: [true, 'DebeDebe insertar la cantidad de horas'],
+    }
 });
 
 module.exports =  model('TimesNoProd',dataSchema);

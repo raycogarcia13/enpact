@@ -71,55 +71,62 @@
       ></v-progress-circular>
     </v-row>
 </v-expand-transition>
-    <v-row v-if="res">
+    <v-row v-if="res" class="mt-0">
       <v-col>
-        <v-data-table
-            :headers="headers"
-            :items="items"
-            :search="search"
-        >
-         <template v-slot:top>
+        <v-card>
+          <v-card-title>
+            <v-spacer></v-spacer>
             <v-text-field
-                v-model="search"
-                append-icon="mdi-magnify"
-                label="Buscar"
-                single-line
-                hide-details
+              v-model="search"
+              append-icon="mdi-magnify"
+              label="Buscar"
+              single-line
+              hide-details
             ></v-text-field>
-        </template>
-        <template v-slot:item.cant="props">
-            <v-edit-dialog
-            :return-value.sync="props.item.cant"
-            large
-            persistent
-            @save="save(props.item)"
-            @close="close"
-            >
-            <div>{{ props.item.cant }}</div>
-            <template v-slot:input>
-               <v-form
-                  ref="form"
-                  v-model="valid"
-                  lazy-validation
-                  @submit.prevent=""
-                >
-                  <div class="mt-4 title">
-                  Timepo en esta actividad
-                  </div>
-                  <v-text-field
-                  v-model="props.item.cant"
-                  :rules="[max25chars]"
-                  label="Tiempo empleado"
-                  single-line
-                  counter
-                  autofocus
-                  v-on:keyup.enter="save(props.item)"
-                  ></v-text-field>
-               </v-form>
-            </template>
-            </v-edit-dialog>
-        </template>
-        </v-data-table>
+          </v-card-title>
+         <v-card-text>
+          <v-data-table
+              :headers="headers"
+              :items="items"
+              :search="search"
+              hide-default-footer
+              :item-class="itemRowStyle"
+          >
+          <template v-slot:item.time="props">
+              <v-edit-dialog
+              :return-value.sync="props.item.time"
+              large
+              persistent
+              @save="save(props.item)"
+              @close="close"
+              >
+              <div>{{ props.item.time }} </div>
+              <template v-slot:input>
+                <v-form
+                    ref="form"
+                    v-model="valid"
+                    lazy-validation
+                    @submit.prevent=""
+                  >
+                    <div class="mt-4 title">
+                    Tiempo en esta actividad
+                    </div>
+                    <v-text-field
+                    v-model="props.item.time"
+                    :rules="[max25chars]"
+                    label="Tiempo empleado"
+                    single-line
+                    counter
+                    autofocus
+                    v-on:keyup.enter="save(props.item)"
+                    ></v-text-field>
+                </v-form>
+              </template>
+              </v-edit-dialog>
+          </template>
+          </v-data-table>
+         </v-card-text>
+        </v-card>
 
         <v-snackbar
         v-model="snack"
@@ -157,9 +164,9 @@ export default {
     res:true,
     cargando:false,
     menu:false,
-    fecha: moment().toISOString().substr(0,10),
-    maxDate: moment().toISOString().substr(0,10),
-    projects:[],
+    fecha: moment().format('YYYY-MM-DD'),
+    maxDate: moment().format('YYYY-MM-DD'),
+    services:[],
     activities:[],
     ct:[],
     snack: false,
@@ -170,40 +177,64 @@ export default {
     max25chars: v => !isNaN(v) || 'Debe ser un valor númerico!',
     headers: [
       {
-        text: 'Producto',
+        text: 'Actividad/Servicio',
         align: 'start',
-        value: 'nombre',
+        value: 'name',
       },
-      { text: 'kg', value: 'cant' },
+      { text: 'Identificador', value: 'code' },
+      { text: 'Horas', value: 'time' },
     ],
 
   }),
   computed: {
     items(){
-      return [{nombre:'Hola',cant:'2'}]
+      let all = [];
+      this.activities.forEach(item => {
+        let time = this.ct.find(act=>act.activity?act.activity._id==item._id:false);
+        time = time?time.cantHours:0
+        all.push({type:'activity',id:item._id,name:item.name,code:'item.code', time})
+      });
+      this.services.forEach(item => {
+        let time = this.ct.find(act=>act.service?act.service._id==item._id:false);
+        time = time?time.cantHours:0
+        all.push({type:'service',id:item._id,name:item.name,code:item.code, time})
+      });
+
+      return all;
     }
   },
   methods: {
+     itemRowStyle(item){
+      if(item.type == 'activity')
+        return 'activity'
+      return 'service'
+    },
      save (item) {
-        // if(this.$refs.form.validate())
-        // {
-        //   let uri = '/api/captador';
-          item['date'] =this.fecha;
-        //   item['unidad'] =this.unidad._id;
-        //   item.cant = Number.parseFloat(item.cant);
-        //   this.$axios.put(uri,item).then(()=>{
-        //     this.snack = true
-        //     this.snackColor = 'success'
-        //     this.snackText = 'Información guardada correctamente';
-        //   })
-        // }else
-        // {
-        //     this.$refs.form.reset()
-        //     this.$refs.form.resetValidation()
-        //     this.snack = true
-        //     this.snackColor = 'danger'
-        //     this.snackText = 'Tiene errores en le formulario';
-        // }
+        if(this.$refs.form.validate())
+        {
+            const data = {
+              type:item.type,
+              date:moment(this.fecha).format('YYYY-MM-DD'),
+              id:item.id,
+              cantHours:item.time
+            }
+            let uri = '/ct'
+            this.$axios.put(uri, data).then((res) => {
+              this.snack = true
+              this.snackColor = 'success'
+              this.snackText = 'Información guardada correctamente'
+              console.log(res.data.data);
+              // Object.assign(this.ct[this.ct.findIndex(t=>t._id == res.data.data._id)], res.data.data);
+              this.close()
+            })
+        }else
+        {
+            this.$refs.form.reset()
+            this.$refs.form.resetValidation()
+            this.snack = true
+            this.snackColor = 'danger'
+            this.snackText = 'Tiene errores en le formulario';
+        }
 
       },
       cancel () {
@@ -220,14 +251,57 @@ export default {
         console.log('Dialog closed')
       },
       loadData(){
-        alert('hla')
+        let uri = '/ct'
+        this.cargando = true;
+        this.$axios.post(uri,{date:this.fecha}).then((res)=>{
+          this.ct = res.data.services.concat(res.data.activities);
+          this.cargando = false;
+        }).catch(()=>{
+          this.cargando = false
+        })
+      },
+      loadMyservices(){
+        let uri = '/my_services'
+        this.cargando = true;
+        this.$axios.get(uri).then(res=>{
+          this.services = res.data.data;
+          this.cargando = false;
+        }).catch(()=>{
+          this.cargando = false
+        })
+      },
+      loadActivities(){
+        let uri = '/activity'
+        this.cargando = true;
+        this.$axios.get(uri).then(res=>{
+          this.activities = res.data.data;
+          this.cargando = false;
+        }).catch(()=>{
+          this.cargando = false
+        })
       },
       nextDay(){
-        this.fecha = moment(this.fecha).add(1,"day").toISOString().substr(0,10)
+        this.fecha = moment(this.fecha).add(1,"day").format('YYYY-MM-DD')
+        this.loadData();
       },
       prevDay(){
-        this.fecha = moment(this.fecha).subtract(1,"day").toISOString().substr(0,10)
+        this.fecha = moment(this.fecha).subtract(1,"day").format('YYYY-MM-DD')
+        this.loadData();
       }
+  },
+  mounted() {
+    this.loadMyservices();
+    this.loadActivities();
+    this.loadData();
   },
 };
 </script>
+
+<style>
+  .activity{
+    color: green;
+  }
+  .service{
+    color: red;
+  }
+</style>

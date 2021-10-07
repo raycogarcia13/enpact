@@ -6,12 +6,12 @@ Vue.use(Router)
 export default new Router({
     routes: [
        {
-            path: '/',
+            path: '/admin',
             component: ()=>import('@/templates/Base'),
             children:[
                 {
                     path: '',
-                    component: ()=>import('@/pages/Home')
+                    component: ()=>import('@/pages/Admin')
                 },
                 {
                     path: '/proyectista',
@@ -25,6 +25,19 @@ export default new Router({
                     path: '/servicios',
                     component: ()=>import('@/pages/Services')
                 },
+                {
+                    path: '/actividades',
+                    component: ()=>import('@/pages/Activities')
+                },
+            ]
+        },
+       {
+             path: '/',
+            component: ()=>import('@/templates/CT'),
+            children:[{
+                path: '',
+                component: ()=>import('@/pages/Home'),
+            }
             ]
         },
        {

@@ -3,10 +3,10 @@ const router = express.Router();
 
 const { login, logout, refreshUser } = require('../controllers/authController')
 
-const { isAuthenticatedUser } = require("../middlewares/auth")
+const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth")
 
 router.post('/login', login);
-router.get('/logout', isAuthenticatedUser, logout);
-router.get('/refreshUser', refreshUser);
+router.post('/logout', isAuthenticatedUser, logout);
+router.get('/refreshUser',isAuthenticatedUser, authorizeRoles('CTJefe'), refreshUser);
 
 module.exports = router

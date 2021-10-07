@@ -18,7 +18,7 @@
       <v-col>
         <v-card>
           <v-card-title>
-            Contratos
+            Actividades no productivas
             <v-btn @click="dialogInsert = !dialogInsert" class="ml-10" fab x-small color="primary">
               <v-icon>mdi-plus</v-icon>
             </v-btn>
@@ -29,29 +29,19 @@
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
-              label="Search"
+              label="Buscar"
               single-line
               hide-details
             ></v-text-field>
           </v-card-title>
           <v-card-text>
             <v-data-table :headers="headers" :items="data" :search="search" :item-class="itemRowStyle" >
-              <template v-slot:item.fecha_inicio="{ item }">
-                {{ `${item.initialDateP?fecha(item.initialDateP):'-'} /` }}
-                <b>{{ item.initialDateR?fecha(item.initialDateR):'-' }}</b>
-              </template>
-              <template v-slot:item.fecha_final="{ item }">
-                {{ `${fecha(item.finalDateP)} /` }}
-                <b>{{ item.finalDateR ? fecha(item.finalDateR) : '-' }}</b>
-              </template>
-              <template v-slot:item.services="{ item }">
-                {{ item.services.map(item=>item.code).join(' - ')}}
+              <template v-slot:item.rating="{ item }">
+                <v-chip :color="item.rating?'success':''">
+                  {{item.rating?'Si':"No"}}
+                </v-chip>
               </template>
               <template v-slot:item.actions="{ item }">
-                <!-- <v-btn-toggle> -->
-                <v-btn icon x-small>
-                  <v-icon color="info">mdi-plus</v-icon>
-                </v-btn>
 
                 <v-btn @click="editItem(item)" icon x-small>
                   <v-icon color="green">mdi-pencil</v-icon>
@@ -64,7 +54,6 @@
                   <v-icon color="success">mdi-check</v-icon>
                 </v-btn>
 
-                <!-- </v-btn-toggle> -->
               </template>
             </v-data-table>
           </v-card-text>
@@ -110,6 +99,7 @@
     <v-dialog
           v-model="dialogInsert"
           max-width="500px"
+          persistent
         >
           <v-card>
             <v-card-title>
@@ -121,149 +111,28 @@
                 <v-row>
                   <v-col
                     cols="12"
-                    sm="6"
-                    md="6"
                   >
                     <v-text-field
                       v-model="editedItem.name"
-                      label="Nombre del contrato"
+                      label="Actividad"
                     ></v-text-field>
                   </v-col>
                   <v-col
                     cols="12"
-                    sm="6"
-                    md="6"
                   >
-                    <v-text-field
-                      v-model="editedItem.code"
-                      label="Código"
-                    ></v-text-field>
+                    <v-textarea
+                      v-model="editedItem.description"
+                      label="Descripción"
+                    ></v-textarea>
                   </v-col>
                   <v-col
                     cols="12"
-                    sm="6"
-                    md="6"
                   >
-                    <v-menu
-                      ref="menu"
-                      :close-on-content-click="true"
-                      transition="scale-transition"
-                      offset-y
-                      left
-                      min-width="auto"
-                    >
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-text-field
-                          label="Fecha inicial planificada"
-                          v-model="editedItem.initialDateP"
-                          prepend-icon="mdi-calendar"
-                          readonly
-                          v-bind="attrs"
-                          v-on="on"
-                        ></v-text-field>
-                      </template>
-                      <v-date-picker
-                        v-model="editedItem.initialDateP"
-                        no-title
-                        scrollable
-                      >
-                      </v-date-picker>
-                    </v-menu>
+                   <v-switch
+                    v-model="editedItem.rating"
+                    label="Se prorratea"
+                  ></v-switch>
                   </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="6"
-                  >
-                    <v-menu
-                      ref="menu2"
-                      :close-on-content-click="true"
-                      transition="scale-transition"
-                      offset-y
-                      left
-                      min-width="auto"
-                    >
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-text-field
-                          label="Fecha final planificada"
-                          v-model="editedItem.finalDateP"
-                          prepend-icon="mdi-calendar"
-                          readonly
-                          v-bind="attrs"
-                          v-on="on"
-                        ></v-text-field>
-                      </template>
-                      <v-date-picker
-                        v-model="editedItem.finalDateP"
-                        no-title
-                        scrollable
-                      >
-                      </v-date-picker>
-                    </v-menu>
-                  </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="6"
-                  >
-                    <v-menu
-                      ref="menu2"
-                      :close-on-content-click="true"
-                      transition="scale-transition"
-                      offset-y
-                      left
-                      min-width="auto"
-                    >
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-text-field
-                          label="Fecha inicial real"
-                          v-model="editedItem.initialDateR"
-                          prepend-icon="mdi-calendar"
-                          readonly
-                          v-bind="attrs"
-                          v-on="on"
-                        ></v-text-field>
-                      </template>
-                      <v-date-picker
-                        v-model="editedItem.initialDateR"
-                        no-title
-                        scrollable
-                      >
-                      </v-date-picker>
-                    </v-menu>
-                  </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="6"
-                  >
-                    <v-menu
-                      ref="menu2"
-                      :close-on-content-click="true"
-                      transition="scale-transition"
-                      offset-y
-                      left
-                      min-width="auto"
-                    >
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-text-field
-                          label="Fecha final real"
-                          v-model="editedItem.finalDateR"
-                          prepend-icon="mdi-calendar"
-                          readonly
-                          v-bind="attrs"
-                          v-on="on"
-                        ></v-text-field>
-                      </template>
-                      <v-date-picker
-                        v-model="editedItem.finalDateR"
-                        no-title
-                        scrollable
-                      >
-                      </v-date-picker>
-                    </v-menu>
-                  </v-col>
-                 
                 </v-row>
               </v-container>
             </v-card-text>
@@ -299,10 +168,7 @@ export default {
   data: () => ({
     res: true,
     cargando: true,
-    menu: false,
-    group: false,
     data: [],
-    departments: [],
     snack: false,
     dialogInsert: false,
     valid: true,
@@ -313,20 +179,14 @@ export default {
     snackText: '',
     defaultItem: {
       name:'',
-      code:'',
-      initialDateP:moment().toISOString().substr(0, 10),
-      initialDateR:null,
-      finalDateP:null,
-      finalDateR:null
+      description:'',
+      rating:false
     },
     editedIndex:-1,
     editedItem:{
       name:'',
-      code:'',
-      initialDateP:moment().toISOString().substr(0, 10),
-      initialDateR:null,
-      finalDateP:null,
-      finalDateR:null
+      description:'',
+      rating:false
     },
     required: v => v != null || 'Debe escoger un valor!',
     headers: [
@@ -335,29 +195,22 @@ export default {
         align: 'start',
         value: 'name'
       },
-      { text: 'Código', value: 'code' },
-      { text: 'Fecha Inicio(P/R)', value: 'fecha_inicio' },
-      { text: 'Fecha Final(P/R)', value: 'fecha_final' },
-      { text: 'Servicios', value: 'services' },
+      { text: 'Descripción', value: 'description' },
+      { text: 'Se prorratea', value: 'rating' },
       { text: 'Acciones', value: 'actions' }
     ],
     getAll:false
   }),
   computed: {
-    selDepartments () {
-      return this.departments.map(item => {
-        return { value: item, text: item.name }
-      })
-    },
     formTitle () {
-      return this.editedIndex === -1 ? 'Nuevo contrato' : 'Editar contrato'
+      return this.editedIndex === -1 ? 'Nueva actividad' : 'Editar Actividad'
     },
   },
   methods: {
     itemRowStyle(item){
       if(item.deletedAt)
         return 'rowDeleted'
-      return item.finalDateR ? 'rowCompleted':''
+      return ''
     },
     fecha (dt) {
       return moment(dt)
@@ -366,17 +219,16 @@ export default {
     },
     save () {
       if (this.editedIndex > -1) {
-            let uri = `/project/${this.editedItem._id}`
+            let uri = `/activity/${this.editedItem._id}`
             this.$axios.put(uri, this.editedItem).then((res) => {
               this.snack = true
               this.snackColor = 'success'
               this.snackText = 'Información guardada correctamente'
-              console.log(this.editedIndex,this.data,this.data[this.editedIndex],res.data.data)
               Object.assign(this.data[this.editedIndex], res.data.data);
               this.close()
             })
         } else {
-            let uri = `/project`
+            let uri = `/activity`
             this.$axios.post(uri, this.editedItem).then((res) => {
               this.snack = true
               this.snackColor = 'success'
@@ -402,7 +254,7 @@ export default {
     },
     loadData () {
       this.cargando = true;
-      let uri = !this.getAll?'/project':'/project_all'
+      let uri = !this.getAll?'/activity':'/activity_all'
       this.$axios.get(uri).then(res => {
         this.data = res.data.data
         this.cargando = false;
@@ -423,7 +275,6 @@ export default {
     },
     editItem(item){
       this.editedIndex = this.data.indexOf(item)
-      console.log(this.editedIndex)
       this.editedItem = Object.assign({}, item)
       this.editedItem.initialDateP=this.editedItem.initialDateP?moment(this.editedItem.initialDateP).toISOString().substr(0, 10):null
       this.editedItem.finalDateP=this.editedItem.finalDateP?moment(this.editedItem.finalDateP).toISOString().substr(0, 10):null
@@ -432,28 +283,28 @@ export default {
       this.dialogInsert = true;
     },
     deleteItem(){
-      let uri = `project/${this.toDelete._id}`;
+      let uri = `activity/${this.toDelete._id}`;
       this.$axios.delete(uri).then(()=>{
         this.dialog = !this.dialog
         this.snack = true
         this.snackColor = 'success'
-        this.snackText = 'Proyecto marcado como eliminado'
+        this.snackText = 'Actividad marcada como eliminado'
         this.data = this.data.filter(item=>item._id!=this.toDelete._id)
         this.toDelete = null
       })
     },
     restore(item){
-      let uri = `project/${item._id}`;
+      let uri = `activity/${item._id}`;
       this.$axios.put(uri,{deletedAt:null}).then(()=>{
         this.snack = true
         this.snackColor = 'success'
         this.snackText = 'Proyecto restaurado'
         item.deletedAt = null
       })
-    }
+    },
   },
   mounted () {
-    this.loadData()
+    this.loadData();
   }
 }
 </script>

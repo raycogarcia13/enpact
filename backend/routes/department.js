@@ -3,12 +3,11 @@ const router = express.Router();
 
 const { all, find, store , update} = require('../controllers/departmentController')
 
-const { isAuthenticatedUser, authorizeRole } = require("../middlewares/auth")
+const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth")
 
-// router.get('/logout', isAuthenticatedUser, authorizeRole('Admin'), logout);
-router.get('/department', all);
-router.get('/department/:id', find);
-router.post('/department', store);
-router.put('/department/:id', update);
+router.get('/department',isAuthenticatedUser, all);
+router.get('/department/:id',isAuthenticatedUser, find);
+router.post('/department',isAuthenticatedUser,authorizeRoles('CTJefe','CTRRHH'), store);
+router.put('/department/:id',isAuthenticatedUser,authorizeRoles('CTJefe','CTRRHH'),update);
 
 module.exports = router

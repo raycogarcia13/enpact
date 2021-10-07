@@ -23,7 +23,7 @@
               <v-icon>mdi-plus</v-icon>
             </v-btn>
             <v-btn @click="loadAll()" class="ml-10" fab x-small color="primary">
-              <v-icon>mdi-eye</v-icon>
+              <v-icon v-text="getAll?'mdi-eye':'mdi-eye-off'"></v-icon>
             </v-btn>
             <v-spacer></v-spacer>
             <v-text-field
@@ -44,14 +44,14 @@
                 {{ `${fecha(item.finalDateP)} /` }}
                 <b>{{ item.finalDateR ? fecha(item.finalDateR) : '-' }}</b>
               </template>
-              <template v-slot:item.services="{ item }">
-                servicios{{ item.services }}
+              <template v-slot:item.team="{ item }">
+                {{ item.team.map(item=>getName(item.name)).join(' - ')}}
+                <!-- {{ item.team.map(item=>item.name).join(' - ')}} -->
+              </template>
+              <template v-slot:item.projectManager="{ item }">
+                {{ item.projectManager.name}}
               </template>
               <template v-slot:item.actions="{ item }">
-                <!-- <v-btn-toggle> -->
-                <v-btn icon x-small>
-                  <v-icon color="info">mdi-plus</v-icon>
-                </v-btn>
 
                 <v-btn @click="editItem(item)" icon x-small>
                   <v-icon color="green">mdi-pencil</v-icon>
@@ -64,7 +64,6 @@
                   <v-icon color="success">mdi-check</v-icon>
                 </v-btn>
 
-                <!-- </v-btn-toggle> -->
               </template>
             </v-data-table>
           </v-card-text>
@@ -110,6 +109,7 @@
     <v-dialog
           v-model="dialogInsert"
           max-width="500px"
+          persistent
         >
           <v-card>
             <v-card-title>
@@ -263,6 +263,33 @@
                       </v-date-picker>
                     </v-menu>
                   </v-col>
+                  <v-col
+                    cols="12"
+                    sm="12"
+                    md="12"
+                  >
+                    <v-select
+                      v-model="editedItem.projectManager"
+                      :items="selProjectors"
+                      :menu-props="{ maxHeight: '400' }"
+                      label="Jefe del proyecto"
+                      hint="Escoge al jefe del proyecto"
+                    ></v-select>
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="12"
+                    md="12"
+                  >
+                    <v-select
+                      v-model="editedItem.team"
+                      :items="selProjectors"
+                      :menu-props="{ maxHeight: '400' }"
+                      label="Equipo"
+                      multiple
+                      hint="Selecciona los integrantes del equipo"
+                    ></v-select>
+                  </v-col>
                  
                 </v-row>
               </v-container>
@@ -298,11 +325,11 @@ export default {
 
   data: () => ({
     res: true,
-    cargando: false,
+    cargando: true,
     menu: false,
     group: false,
     data: [],
-    departments: [],
+    projectors: [],
     snack: false,
     dialogInsert: false,
     valid: true,
@@ -317,7 +344,9 @@ export default {
       initialDateP:moment().toISOString().substr(0, 10),
       initialDateR:null,
       finalDateP:null,
-      finalDateR:null
+      finalDateR:null,
+      projectManager:{},
+      team:[]
     },
     editedIndex:-1,
     editedItem:{
@@ -326,7 +355,9 @@ export default {
       initialDateP:moment().toISOString().substr(0, 10),
       initialDateR:null,
       finalDateP:null,
-      finalDateR:null
+      finalDateR:null,
+      projectManager:{},
+      team:[]
     },
     required: v => v != null || 'Debe escoger un valor!',
     headers: [
@@ -338,18 +369,20 @@ export default {
       { text: 'Código', value: 'code' },
       { text: 'Fecha Inicio(P/R)', value: 'fecha_inicio' },
       { text: 'Fecha Final(P/R)', value: 'fecha_final' },
-      { text: 'Servicios', value: 'services' },
+      { text: 'J/Proyecto', value: 'projectManager' },
+      { text: 'Equipo', value: 'team' },
       { text: 'Acciones', value: 'actions' }
-    ]
+    ],
+    getAll:false
   }),
   computed: {
-    selDepartments () {
-      return this.departments.map(item => {
+    selProjectors () {
+      return this.projectors.map(item => {
         return { value: item, text: item.name }
       })
     },
     formTitle () {
-      return this.editedIndex === -1 ? 'Nuevo contrato' : 'Editar contrato'
+      return this.editedIndex === -1 ? 'Nuevo servicio' : 'Editar servicio'
     },
   },
   methods: {
@@ -365,12 +398,15 @@ export default {
     },
     save () {
       if (this.editedIndex > -1) {
-            let uri = `/project/${this.editedItem._id}`
+        let data = {...this.editedItem}
+        data.projectManager = data.projectManager._id;
+        data.project = data.project._id;
+        data.team = data.team.map(item=>item._id)
+            let uri = `/services/${this.editedItem._id}`
             this.$axios.put(uri, this.editedItem).then((res) => {
               this.snack = true
               this.snackColor = 'success'
               this.snackText = 'Información guardada correctamente'
-              console.log(this.editedIndex,this.data,this.data[this.editedIndex],res.data.data)
               Object.assign(this.data[this.editedIndex], res.data.data);
               this.close()
             })
@@ -400,22 +436,28 @@ export default {
       this.dialog = !this.dialog
     },
     loadData () {
-      let uri = '/project'
+      this.cargando = true;
+      let uri = !this.getAll?'/services':'/services_all'
       this.$axios.get(uri).then(res => {
         this.data = res.data.data
+        this.cargando = false;
+      }).catch(()=>{
+        this.cargando = false;
       })
     },
-    loadAll () {
-      let uri = '/project_all'
+    loadProjectors () {
+      this.cargando = true;
+      let uri = '/projector_only'
       this.$axios.get(uri).then(res => {
-        this.data = res.data.data
+        this.projectors = res.data.data
+        this.cargando = false;
+      }).catch(()=>{
+        this.cargando = false;
       })
     },
-    loadDepartments () {
-      let uri = '/department'
-      this.$axios.get(uri).then(res => {
-        this.departments = res.data.data
-      })
+    loadAll() {
+      this.getAll = ! this.getAll;
+      this.loadData();
     },
     close(){
       this.dialogInsert = false
@@ -426,7 +468,6 @@ export default {
     },
     editItem(item){
       this.editedIndex = this.data.indexOf(item)
-      console.log(this.editedIndex)
       this.editedItem = Object.assign({}, item)
       this.editedItem.initialDateP=this.editedItem.initialDateP?moment(this.editedItem.initialDateP).toISOString().substr(0, 10):null
       this.editedItem.finalDateP=this.editedItem.finalDateP?moment(this.editedItem.finalDateP).toISOString().substr(0, 10):null
@@ -453,11 +494,14 @@ export default {
         this.snackText = 'Proyecto restaurado'
         item.deletedAt = null
       })
+    },
+    getName(name){
+      return name.split(' ')[0]
     }
   },
   mounted () {
-    this.loadData()
-    this.loadDepartments()
+    this.loadData();
+    this.loadProjectors();
   }
 }
 </script>

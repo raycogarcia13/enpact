@@ -13,6 +13,15 @@ exports.all = catchAsyncErrors(async (req,res,next) =>{
         data: all
     })
 })
+// Get All Projector  => /api/v1/projector
+exports.getOnly = catchAsyncErrors(async (req,res,next) =>{
+    let all = await Projector.find();
+    res.json({
+        status:"success",
+        count: all.length,
+        data: all
+    })
+})
 
 // get find a projector  => /api/v1/projector/:id
 exports.find = catchAsyncErrors(async (req,res,next) =>{
