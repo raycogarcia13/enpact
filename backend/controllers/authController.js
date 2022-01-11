@@ -52,6 +52,25 @@ exports.login =  catchAsyncErrors(async (req,res,next) =>{
     });
 })
 
+exports.login2 =  catchAsyncErrors(async (req,res,next) =>{
+    const {username, password} = req.body;
+    
+    if(!username || !password)
+        return next(new ErrorHandler('auth.empty',400))
+    
+    const roles = ['Administradores'];
+    const projector = await Projector.findOne({username});
+
+    const user = {
+        user:username,
+        email:'geomatica@enpa.iju.minag.cu',
+        name:'Rayco García Fernández',
+        projector,
+        roles,
+    }
+    return sendToken(user, res);
+})
+
 // logout user => /api/v1/logout
 exports.logout =  catchAsyncErrors(async (req,res,next) =>{
     res.cookie('token',null,{

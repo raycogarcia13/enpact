@@ -76,17 +76,25 @@ export default {
       let uri = 'login';
       this.$axios.post(uri,{username:this.email,password:this.password}).then(res=>{
           this.login(res)
-          this.$router.push('/')  
+          this.redirection();
       }).catch(err => {
         console.log(err)
         // this.error = err.response.data.error
         this.error = 'Credenciales erróneas'
       })
+    },
+    redirection(){
+       if(this.$hasRole('CTPoyectista'))
+        this.$router.push('/')
+      else if(this.$hasRole('CTJefe') || this.$hasRole('CTRHH'))
+        this.$router.push('/admin')
     }
   },
   beforeMount() {
     if(this.auth)
-      this.$router.push('/')
+    {
+     this.redirection();
+    }
   },
 };
 </script>

@@ -19,6 +19,16 @@ exports.get = catchAsyncErrors(async (req,res,next) =>{
         data: todos
     })
 })
+// get only project  => /api/v1/department
+exports.only = catchAsyncErrors(async (req,res,next) =>{
+    let all = await Project.find({finalDateR:null,deletedAt:null});
+
+    res.json({
+        status:"success",
+        count: all.length,
+        data: all
+    })
+})
 // get all project  => /api/v1/department
 exports.all = catchAsyncErrors(async (req,res,next) =>{
     let all = await Project.find();

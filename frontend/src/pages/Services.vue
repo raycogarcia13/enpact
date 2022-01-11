@@ -36,6 +36,9 @@
           </v-card-title>
           <v-card-text>
             <v-data-table :headers="headers" :items="data" :search="search" :item-class="itemRowStyle" >
+              <template v-slot:item.project="{ item }">
+                {{ item.project.name }}
+              </template>
               <template v-slot:item.fecha_inicio="{ item }">
                 {{ `${item.initialDateP?fecha(item.initialDateP):'-'} /` }}
                 <b>{{ item.initialDateR?fecha(item.initialDateR):'-' }}</b>
@@ -138,6 +141,19 @@
                       v-model="editedItem.code"
                       label="Código"
                     ></v-text-field>
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="12"
+                    md="12"
+                  >
+                    <v-select
+                      v-model="editedItem.project"
+                      :items="selProjects"
+                      :menu-props="{ maxHeight: '400' }"
+                      label="Proyecto"
+                      hint="Selecciona el proyecto al que pertence"
+                    ></v-select>
                   </v-col>
                   <v-col
                     cols="12"
@@ -330,6 +346,7 @@ export default {
     group: false,
     data: [],
     projectors: [],
+    projects: [],
     snack: false,
     dialogInsert: false,
     valid: true,
@@ -345,6 +362,7 @@ export default {
       initialDateR:null,
       finalDateP:null,
       finalDateR:null,
+      project:null,
       projectManager:{},
       team:[]
     },
@@ -357,6 +375,7 @@ export default {
       finalDateP:null,
       finalDateR:null,
       projectManager:{},
+      project:null,
       team:[]
     },
     required: v => v != null || 'Debe escoger un valor!',
@@ -366,6 +385,7 @@ export default {
         align: 'start',
         value: 'name'
       },
+      { text: 'Proyecto', value: 'project' },
       { text: 'Código', value: 'code' },
       { text: 'Fecha Inicio(P/R)', value: 'fecha_inicio' },
       { text: 'Fecha Final(P/R)', value: 'fecha_final' },
@@ -378,6 +398,11 @@ export default {
   computed: {
     selProjectors () {
       return this.projectors.map(item => {
+        return { value: item, text: item.name }
+      })
+    },
+    selProjects () {
+      return this.projects.map(item => {
         return { value: item, text: item.name }
       })
     },
@@ -411,7 +436,7 @@ export default {
               this.close()
             })
         } else {
-            let uri = `/project`
+            let uri = `/services`
             this.$axios.post(uri, this.editedItem).then((res) => {
               this.snack = true
               this.snackColor = 'success'
@@ -450,6 +475,16 @@ export default {
       let uri = '/projector_only'
       this.$axios.get(uri).then(res => {
         this.projectors = res.data.data
+        this.cargando = false;
+      }).catch(()=>{
+        this.cargando = false;
+      })
+    },
+    loadProjects () {
+      this.cargando = true;
+      let uri = '/project_only'
+      this.$axios.get(uri).then(res => {
+        this.projects = res.data.data
         this.cargando = false;
       }).catch(()=>{
         this.cargando = false;
@@ -502,6 +537,7 @@ export default {
   mounted () {
     this.loadData();
     this.loadProjectors();
+    this.loadProjects();
   }
 }
 </script>

@@ -1,6 +1,10 @@
 const { Schema, model, Types } = require("mongoose");
 
 const dataSchema = new Schema({
+    name:{
+        type: String,
+        required: [true, 'Debe el nombre'],
+    },
     description:{
         type: String,
         required: [true, 'Debe insertar la descripción'],

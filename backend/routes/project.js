@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const { get ,all, find,store, update, remove} = require('../controllers/projectController')
+const { get, only ,all, find,store, update, remove} = require('../controllers/projectController')
 
 const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth")
 
 router.get('/project',isAuthenticatedUser, get);
+router.get('/project_only',isAuthenticatedUser, only);
 router.get('/project_all',isAuthenticatedUser,authorizeRoles('CTJefe'), all);
 router.get('/project/:id',isAuthenticatedUser ,find);
 router.post('/project',isAuthenticatedUser,authorizeRoles('CTJefe'), store);

@@ -18,45 +18,33 @@
       <v-col>
         <v-card>
           <v-card-title>
-            Actividades no productivas
+            Díás feriados
             <v-btn @click="dialogInsert = !dialogInsert" class="ml-10" fab x-small color="primary">
               <v-icon>mdi-plus</v-icon>
-            </v-btn>
-            <v-btn @click="loadAll()" class="ml-10" fab x-small color="primary">
-              <v-icon v-text="getAll?'mdi-eye':'mdi-eye-off'"></v-icon>
             </v-btn>
             <v-spacer></v-spacer>
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
-              label="Buscar"
+              label="Filtrar"
               single-line
               hide-details
             ></v-text-field>
           </v-card-title>
           <v-card-text>
             <v-data-table :headers="headers" :items="data" :search="search" :item-class="itemRowStyle" >
-              <template v-slot:item.rating="{ item }">
-                <v-chip :color="item.rating?'success':''">
-                  {{item.rating?'Si':"No"}}
-                </v-chip>
+              <template v-slot:item.date="{ item }">
+                {{ fecha(item.date)}}
               </template>
-              <template v-slot:item.editable="{ item }">
-                <v-chip :color="item.editable?'success':''">
-                  {{item.editable?'Si':"No"}}
+               <template v-slot:item.repeat="{ item }">
+                <v-chip :color="item.repeat?'success':''">
+                  {{item.repeat?'Si':"No"}}
                 </v-chip>
               </template>
               <template v-slot:item.actions="{ item }">
 
                 <v-btn @click="editItem(item)" icon x-small>
                   <v-icon color="green">mdi-pencil</v-icon>
-                </v-btn>
-
-                <v-btn v-if="!item.deletedAt" @click="remove(item)" icon x-small>
-                  <v-icon color="error">mdi-delete</v-icon>
-                </v-btn>
-                 <v-btn v-else icon x-small @click="restore(item)">
-                  <v-icon color="success">mdi-check</v-icon>
                 </v-btn>
 
               </template>
@@ -74,33 +62,6 @@
         </v-snackbar>
       </v-col>
     </v-row>
-    <v-dialog v-model="dialog" persistent max-width="400">
-      <v-card>
-        <v-card-title class="text-h5 text-center justify-center">
-          <v-icon color="warning" x-large>mdi-alert-outline</v-icon>
-          ¿Está seguro de querer eliminar el contrato
-          {{ toDelete ? toDelete.code : '' }}?
-        </v-card-title>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="green darken-1"
-            text
-            @click="
-              () => {
-                dialog = false
-                toDelete = null
-              }
-            "
-          >
-            Cancelar
-          </v-btn>
-          <v-btn color="error darken-1" text @click="deleteItem">
-            Eliminar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
     <v-dialog
           v-model="dialogInsert"
           max-width="500px"
@@ -116,36 +77,55 @@
                 <v-row>
                   <v-col
                     cols="12"
+                    sm="12"
+                    md="12"
                   >
                     <v-text-field
-                      v-model="editedItem.name"
-                      label="Actividad"
+                      v-model="editedItem.description"
+                      label="Motivo"
                     ></v-text-field>
+                  </v-col>
+                 
+                  <v-col
+                    cols="12"
+                    sm="12"
+                    md="12"
+                  >
+                    <v-menu
+                      ref="menu"
+                      :close-on-content-click="true"
+                      transition="scale-transition"
+                      offset-y
+                      left
+                      min-width="auto"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          label="Fecha inicial planificada"
+                          v-model="editedItem.date"
+                          prepend-icon="mdi-calendar"
+                          readonly
+                          v-bind="attrs"
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker
+                        v-model="editedItem.date"
+                        no-title
+                        scrollable
+                      >
+                      </v-date-picker>
+                    </v-menu>
                   </v-col>
                   <v-col
                     cols="12"
                   >
-                    <v-textarea
-                      v-model="editedItem.description"
-                      label="Descripción"
-                    ></v-textarea>
-                  </v-col>
-                  <v-col
-                    cols="6"
-                  >
                    <v-switch
-                    v-model="editedItem.rating"
-                    label="Se prorratea"
+                    v-model="editedItem.repeat"
+                    label="Se repite todos los años"
                   ></v-switch>
                   </v-col>
-                  <v-col
-                    cols="6"
-                  >
-                   <v-switch
-                    v-model="editedItem.editable"
-                    label="Editable"
-                  ></v-switch>
-                  </v-col>
+                 
                 </v-row>
               </v-container>
             </v-card-text>
@@ -181,6 +161,8 @@ export default {
   data: () => ({
     res: true,
     cargando: true,
+    menu: false,
+    group: false,
     data: [],
     snack: false,
     dialogInsert: false,
@@ -191,42 +173,42 @@ export default {
     snackColor: '',
     snackText: '',
     defaultItem: {
-      name:'',
       description:'',
-      rating:false,
-      editable:false
+      date:moment().toISOString().substr(0, 10),
+      repeat:false,
     },
     editedIndex:-1,
     editedItem:{
-      name:'',
       description:'',
-      rating:false,
-      editable:false
+      date:moment().toISOString().substr(0, 10),
+      repeat:false,
     },
     required: v => v != null || 'Debe escoger un valor!',
     headers: [
       {
-        text: 'Nombre',
+        text: 'Descripción',
         align: 'start',
-        value: 'name'
+        value: 'description'
       },
-      { text: 'Descripción', value: 'description' },
-      { text: 'Se prorratea', value: 'rating' },
-      { text: 'Editable por proyectista', value: 'editable' },
+      { text: 'Fecha', value: 'date' },
+      { text: 'Dia', value: 'dia' },
+      { text: 'Mes', value: 'mes' },
+      { text: 'Repetible', value: 'repeat' },
       { text: 'Acciones', value: 'actions' }
     ],
     getAll:false
   }),
   computed: {
+   
     formTitle () {
-      return this.editedIndex === -1 ? 'Nueva actividad' : 'Editar Actividad'
+      return this.editedIndex === -1 ? 'Nuevo día feriado' : 'Editar dia feriado'
     },
   },
   methods: {
     itemRowStyle(item){
       if(item.deletedAt)
         return 'rowDeleted'
-      return ''
+      return item.finalDateR ? 'rowCompleted':''
     },
     fecha (dt) {
       return moment(dt)
@@ -235,16 +217,16 @@ export default {
     },
     save () {
       if (this.editedIndex > -1) {
-            let uri = `/activity/${this.editedItem._id}`
-            this.$axios.put(uri, this.editedItem).then((res) => {
-              this.snack = true
-              this.snackColor = 'success'
-              this.snackText = 'Información guardada correctamente'
-              Object.assign(this.data[this.editedIndex], res.data.data);
-              this.close()
-            })
+          let uri = `/days/holy`
+          this.$axios.put(uri, this.editedItem).then(() => {
+            this.snack = true
+            this.snackColor = 'success'
+            this.snackText = 'Información guardada correctamente'
+            Object.assign(this.data[this.editedIndex], this.editedItem);
+            this.close()
+          })
         } else {
-            let uri = `/activity`
+            let uri = `/days/holy`
             this.$axios.post(uri, this.editedItem).then((res) => {
               this.snack = true
               this.snackColor = 'success'
@@ -270,17 +252,13 @@ export default {
     },
     loadData () {
       this.cargando = true;
-      let uri = !this.getAll?'/activity':'/activity_all'
+      let uri = '/days/holy'
       this.$axios.get(uri).then(res => {
         this.data = res.data.data
         this.cargando = false;
       }).catch(()=>{
         this.cargando = false;
       })
-    },
-    loadAll() {
-      this.getAll = ! this.getAll;
-      this.loadData();
     },
     close(){
       this.dialogInsert = false
@@ -292,32 +270,9 @@ export default {
     editItem(item){
       this.editedIndex = this.data.indexOf(item)
       this.editedItem = Object.assign({}, item)
-      this.editedItem.initialDateP=this.editedItem.initialDateP?moment(this.editedItem.initialDateP).toISOString().substr(0, 10):null
-      this.editedItem.finalDateP=this.editedItem.finalDateP?moment(this.editedItem.finalDateP).toISOString().substr(0, 10):null
-      this.editedItem.initialDateR=this.editedItem.initialDateR?moment(this.editedItem.initialDateR).toISOString().substr(0, 10):null
-      this.editedItem.finalDateR=this.editedItem.finalDateR?moment(this.editedItem.finalDateR).toISOString().substr(0, 10):null
+      this.editedItem.date=moment(this.editedItem.date).toISOString().substr(0, 10)
       this.dialogInsert = true;
-    },
-    deleteItem(){
-      let uri = `activity/${this.toDelete._id}`;
-      this.$axios.delete(uri).then(()=>{
-        this.dialog = !this.dialog
-        this.snack = true
-        this.snackColor = 'success'
-        this.snackText = 'Actividad marcada como eliminado'
-        this.data = this.data.filter(item=>item._id!=this.toDelete._id)
-        this.toDelete = null
-      })
-    },
-    restore(item){
-      let uri = `activity/${item._id}`;
-      this.$axios.put(uri,{deletedAt:null}).then(()=>{
-        this.snack = true
-        this.snackColor = 'success'
-        this.snackText = 'Proyecto restaurado'
-        item.deletedAt = null
-      })
-    },
+    }
   },
   mounted () {
     this.loadData();

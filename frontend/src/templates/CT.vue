@@ -25,9 +25,15 @@
                 </template>
                 <v-list>
                     <v-list-item v-if="admin" to="/admin">
+                        <v-list-item-icon>
+                            <v-icon>mdi-lock</v-icon>
+                        </v-list-item-icon>
                         <v-list-item-title>Admin</v-list-item-title>
                     </v-list-item>
-                    <v-list-item @click="logout()">
+                    <v-list-item @click="sendLogout()">
+                        <v-list-item-icon>
+                            <v-icon>mdi-logout</v-icon>
+                        </v-list-item-icon>
                         <v-list-item-title>Cerrar sesión</v-list-item-title>
                     </v-list-item>
                 </v-list>
@@ -40,7 +46,7 @@
 </template>
 
 <script>
-import {mapState} from 'vuex'
+import {mapState,mapActions} from 'vuex'
 export default {
     data() {
         return {
@@ -54,18 +60,18 @@ export default {
         }
     },
     methods: {
-        logout(){
+        ...mapActions('app',['logout']),
+        sendLogout(){
             this.$axios.post('/logout').then(()=>{
+                this.logout();
                 this.$router.push('/login');
             })
         }
     },
-    mounted() {
-        if(!this.auth)
-            this.$router.push('/login')
+    beforeMount() {
+        if(!this.auth || !this.$hasRole('CTProyectista'))
+            return this.$router.push('/login')
         
-         if(!this.$hasRole('CTProyectista'))
-            return this.$router.push('/admin')
-    },
+    } 
 }
 </script>

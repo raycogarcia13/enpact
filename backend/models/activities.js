@@ -13,6 +13,10 @@ const dataSchema = new Schema({
         type:Boolean,
         default:false
     },
+    editable:{
+        type:Boolean,
+        default:true
+    },
     deletedAt:{
         type: Date
     }

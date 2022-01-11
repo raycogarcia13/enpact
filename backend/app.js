@@ -27,14 +27,22 @@ app.use('/api/v1',require("./routes/project"));
 app.use('/api/v1',require("./routes/services"));
 // ct
 app.use('/api/v1',require("./routes/ct"));
+// days
+app.use('/api/v1/days',require("./routes/days"));
+// config
+app.use('/api/v1',require("./routes/config"));
+// leader
+app.use('/api/v1',require("./routes/leader"));
+// close
+app.use('/api/v1',require("./routes/cierre"));
+
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+app.get('*', (req, res)=>{
+    res.sendFile(path.resolve(__dirname,'../frontend/dist/index.html'))
+})
 
 // error middleware
 const errorMiddleware = require('./middlewares/errors')
 app.use(errorMiddleware)
 
-
 module.exports =  app;
-
-
-
-

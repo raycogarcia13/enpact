@@ -8,25 +8,25 @@ exports.days = [
     'Sábado',
 ];
 
-const cantDaysMonth = (mes, anno) => {
+const diasMes = (mes, anno) => {
     let cant;
     switch (mes) {
-        case 1:
-        case 3:
-        case 5:
-        case 7:
-        case 8:
-        case 10:
-        case 12:
+        case '1':
+        case '3':
+        case '5':
+        case '7':
+        case '8':
+        case '10':
+        case '12':
             cant = 31;
             break;
-        case 4:
-        case 6:
-        case 9:
-        case 11:
+        case '4':
+        case '6':
+        case '9':
+        case '11':
             cant = 30;
             break;
-        case 2:
+        case '2':
             if (anno % 100 == 0) {
                 cant = (anno % 400 == 0) ? 29 : 28;
             } else
@@ -35,7 +35,7 @@ const cantDaysMonth = (mes, anno) => {
     }
     return cant;
 }
-exports.cantDaysMonth = cantDaysMonth;
+exports.cantDaysMonth = diasMes;
 // dia de la semana
 exports.dayOfWeek = (dt) => {
     let fecha = new Date(dt);
@@ -63,7 +63,7 @@ const countHourDayP = (dt) => {
 exports.countHourDayP = countHourDayP
 
 exports.countHourMonth = (mes, anno) => {
-    let cantMont = cantDaysMonth(mes, anno);
+    let cantMont = diasMes(mes, anno);
     if (!cantMont)
         return null;
     let cant = 0;

@@ -31,6 +31,20 @@ exports.myServices = catchAsyncErrors(async (req,res,next) =>{
         data: all
     })
 })
+//get services servicesUser => /api/v1/admin_services
+exports.servicesUser = catchAsyncErrors(async (req,res,next) =>{
+    const { id } = req.params;
+    let all = await Services.find({finalDateR:null,deletedAt:null, team:id})
+        .populate('project')
+        .populate('projectManager')
+        .populate({path:'team',populate:{path:'projector'}});
+    
+    res.json({
+        status:"success",
+        count: all.length,
+        data: all
+    })
+})
 // get all project  => /api/v1/department
 exports.all = catchAsyncErrors(async (req,res,next) =>{
     let all = await Services.find() 

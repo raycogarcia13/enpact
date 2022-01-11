@@ -18,33 +18,23 @@
       <v-col>
         <v-card>
           <v-card-title>
-            Actividades no productivas
+            Departamentos
             <v-btn @click="dialogInsert = !dialogInsert" class="ml-10" fab x-small color="primary">
               <v-icon>mdi-plus</v-icon>
-            </v-btn>
-            <v-btn @click="loadAll()" class="ml-10" fab x-small color="primary">
-              <v-icon v-text="getAll?'mdi-eye':'mdi-eye-off'"></v-icon>
             </v-btn>
             <v-spacer></v-spacer>
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
-              label="Buscar"
+              label="Search"
               single-line
               hide-details
             ></v-text-field>
           </v-card-title>
           <v-card-text>
-            <v-data-table :headers="headers" :items="data" :search="search" :item-class="itemRowStyle" >
-              <template v-slot:item.rating="{ item }">
-                <v-chip :color="item.rating?'success':''">
-                  {{item.rating?'Si':"No"}}
-                </v-chip>
-              </template>
-              <template v-slot:item.editable="{ item }">
-                <v-chip :color="item.editable?'success':''">
-                  {{item.editable?'Si':"No"}}
-                </v-chip>
+            <v-data-table :headers="headers" :items="data" :search="search" >
+              <template v-slot:item.leader="{ item }">
+                {{item.leader?item.leader.name:''}}
               </template>
               <template v-slot:item.actions="{ item }">
 
@@ -52,11 +42,8 @@
                   <v-icon color="green">mdi-pencil</v-icon>
                 </v-btn>
 
-                <v-btn v-if="!item.deletedAt" @click="remove(item)" icon x-small>
+                <v-btn @click="remove(item)" icon x-small>
                   <v-icon color="error">mdi-delete</v-icon>
-                </v-btn>
-                 <v-btn v-else icon x-small @click="restore(item)">
-                  <v-icon color="success">mdi-check</v-icon>
                 </v-btn>
 
               </template>
@@ -78,7 +65,7 @@
       <v-card>
         <v-card-title class="text-h5 text-center justify-center">
           <v-icon color="warning" x-large>mdi-alert-outline</v-icon>
-          ¿Está seguro de querer eliminar el contrato
+          ¿Está seguro de querer eliminar el departamento
           {{ toDelete ? toDelete.code : '' }}?
         </v-card-title>
         <v-card-actions>
@@ -116,35 +103,36 @@
                 <v-row>
                   <v-col
                     cols="12"
+                    sm="12"
+                    md="12"
                   >
                     <v-text-field
                       v-model="editedItem.name"
-                      label="Actividad"
+                      label="Nombre del contrato"
                     ></v-text-field>
                   </v-col>
                   <v-col
                     cols="12"
+                    sm="12"
+                    md="12"
                   >
-                    <v-textarea
+                    <v-text-field
                       v-model="editedItem.description"
                       label="Descripción"
-                    ></v-textarea>
+                    ></v-text-field>
                   </v-col>
                   <v-col
-                    cols="6"
+                    cols="12"
+                    sm="12"
+                    md="12"
                   >
-                   <v-switch
-                    v-model="editedItem.rating"
-                    label="Se prorratea"
-                  ></v-switch>
-                  </v-col>
-                  <v-col
-                    cols="6"
-                  >
-                   <v-switch
-                    v-model="editedItem.editable"
-                    label="Editable"
-                  ></v-switch>
+                    <v-select
+                      v-model="editedItem.leader"
+                      :items="selLeader"
+                      :menu-props="{ maxHeight: '400' }"
+                      label="Jefe de Departamento"
+                      hint="Escoge al jefe del departamento"
+                    ></v-select>
                   </v-col>
                 </v-row>
               </v-container>
@@ -172,9 +160,8 @@
   </v-container>
 </template>
 <script>
-import moment from 'moment'
 export default {
-  name: 'App',
+  name: 'Department',
 
   components: {},
 
@@ -190,18 +177,17 @@ export default {
     dialog: false,
     snackColor: '',
     snackText: '',
+    leaders:[],
     defaultItem: {
       name:'',
       description:'',
-      rating:false,
-      editable:false
+      leader:{},
     },
     editedIndex:-1,
     editedItem:{
       name:'',
       description:'',
-      rating:false,
-      editable:false
+      leader:{},
     },
     required: v => v != null || 'Debe escoger un valor!',
     headers: [
@@ -211,31 +197,25 @@ export default {
         value: 'name'
       },
       { text: 'Descripción', value: 'description' },
-      { text: 'Se prorratea', value: 'rating' },
-      { text: 'Editable por proyectista', value: 'editable' },
+      { text: 'Jefe de grupo', value: 'leader' },
       { text: 'Acciones', value: 'actions' }
     ],
     getAll:false
   }),
   computed: {
+    selLeader () {
+      return this.leaders.map(item => {
+        return { value: item, text: item.name }
+      })
+    },
     formTitle () {
-      return this.editedIndex === -1 ? 'Nueva actividad' : 'Editar Actividad'
+      return this.editedIndex === -1 ? 'Nuevo departamento' : 'Editar departamento'
     },
   },
   methods: {
-    itemRowStyle(item){
-      if(item.deletedAt)
-        return 'rowDeleted'
-      return ''
-    },
-    fecha (dt) {
-      return moment(dt)
-        .toISOString()
-        .substr(0, 10)
-    },
     save () {
       if (this.editedIndex > -1) {
-            let uri = `/activity/${this.editedItem._id}`
+            let uri = `/department/${this.editedItem._id}`
             this.$axios.put(uri, this.editedItem).then((res) => {
               this.snack = true
               this.snackColor = 'success'
@@ -244,7 +224,7 @@ export default {
               this.close()
             })
         } else {
-            let uri = `/activity`
+            let uri = `/department`
             this.$axios.post(uri, this.editedItem).then((res) => {
               this.snack = true
               this.snackColor = 'success'
@@ -270,7 +250,7 @@ export default {
     },
     loadData () {
       this.cargando = true;
-      let uri = !this.getAll?'/activity':'/activity_all'
+      let uri = '/department'
       this.$axios.get(uri).then(res => {
         this.data = res.data.data
         this.cargando = false;
@@ -278,9 +258,15 @@ export default {
         this.cargando = false;
       })
     },
-    loadAll() {
-      this.getAll = ! this.getAll;
-      this.loadData();
+    loadLeader() {
+      this.cargando = true;
+      let uri = '/getLeader'
+      this.$axios.get(uri).then(res => {
+        this.leaders = res.data.data
+        this.cargando = false;
+      }).catch(()=>{
+        this.cargando = false;
+      })
     },
     close(){
       this.dialogInsert = false
@@ -292,45 +278,23 @@ export default {
     editItem(item){
       this.editedIndex = this.data.indexOf(item)
       this.editedItem = Object.assign({}, item)
-      this.editedItem.initialDateP=this.editedItem.initialDateP?moment(this.editedItem.initialDateP).toISOString().substr(0, 10):null
-      this.editedItem.finalDateP=this.editedItem.finalDateP?moment(this.editedItem.finalDateP).toISOString().substr(0, 10):null
-      this.editedItem.initialDateR=this.editedItem.initialDateR?moment(this.editedItem.initialDateR).toISOString().substr(0, 10):null
-      this.editedItem.finalDateR=this.editedItem.finalDateR?moment(this.editedItem.finalDateR).toISOString().substr(0, 10):null
       this.dialogInsert = true;
     },
     deleteItem(){
-      let uri = `activity/${this.toDelete._id}`;
+      let uri = `project/${this.toDelete._id}`;
       this.$axios.delete(uri).then(()=>{
         this.dialog = !this.dialog
         this.snack = true
         this.snackColor = 'success'
-        this.snackText = 'Actividad marcada como eliminado'
+        this.snackText = 'Proyecto marcado como eliminado'
         this.data = this.data.filter(item=>item._id!=this.toDelete._id)
         this.toDelete = null
       })
-    },
-    restore(item){
-      let uri = `activity/${item._id}`;
-      this.$axios.put(uri,{deletedAt:null}).then(()=>{
-        this.snack = true
-        this.snackColor = 'success'
-        this.snackText = 'Proyecto restaurado'
-        item.deletedAt = null
-      })
-    },
+    }
   },
   mounted () {
     this.loadData();
+    this.loadLeader();
   }
 }
 </script>
-
-<style>
-  .rowDeleted{
-    text-decoration-line: line-through;
-    text-decoration-color: red;
-  }
-  .rowCompleted{
-    color: green;
-  }
-</style>

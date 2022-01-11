@@ -8,6 +8,10 @@ const dataSchema = new Schema({
     description:{
         type: String,
         required: [true, 'Debe insertar la descripción'],
+    },
+    leader:{
+        type: Types.ObjectId,
+        ref:"Leader"
     }
 });
 

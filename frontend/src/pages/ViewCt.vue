@@ -2,7 +2,9 @@
     <v-container>
       <v-row class="mt-5">
         <v-col cols="" class="text-center">
-        <h2>Control de tiempo trabajado en proyectos</h2>
+        <h2>
+          {{projector.name}}
+        </h2>
         </v-col>
 
         <v-col cols="3" class="text-center">
@@ -226,7 +228,7 @@ import moment from 'moment'
 export default {
   name: 'App',
 
-  props:['date'],
+  props:['id','date'],
   components: {
   },
 
@@ -240,6 +242,7 @@ export default {
     services:[],
     activities:[],
     schedule:[],
+    projector:{},
     ct:[],
     isHoly:false,
     snack: false,
@@ -270,8 +273,8 @@ export default {
   }),
   watch: {
     fecha(){
-        if(this.$router.currentRoute.path !=`/${this.fecha}`  )
-          this.$router.push(`/${this.fecha}`)
+        if(this.$router.currentRoute.path !=`/viewct/${this.$router.currentRoute.params.id}/${this.fecha}`  )
+          this.$router.push(`/viewct/${this.$router.currentRoute.params.id}/${this.fecha}`)
     }
   },
   computed: {
@@ -330,7 +333,8 @@ export default {
               type:item.type,
               date:moment(this.fecha).format('YYYY-MM-DD'),
               id:item.id,
-              cantHours:item.time
+              cantHours:item.time,
+              me:this.id
             }
             let uri = '/ct'
             this.$axios.put(uri, data).then(() => {
@@ -363,10 +367,9 @@ export default {
       },
       async loadData(){
         this.loadIsHoly()
-        let uri = '/ct'
+        let uri = '/ct_admin'
         this.cargando = true;
-        await this.$axios.post(uri,{date:this.fecha}).then((res)=>{
-          // this.ct = res.data.services.concat(res.data.activities);
+        await this.$axios.post(uri,{id:this.id,date:this.fecha}).then((res)=>{
           this.ct = res.data.all;
           this.items = res.data.all;
           this.cargando = false;
@@ -385,10 +388,20 @@ export default {
         })
       },
       loadMyservices(){
-        let uri = '/my_services'
+        let uri = '/admin_services/'+this.id
         this.cargando = true;
         this.$axios.get(uri).then(res=>{
           this.services = res.data.data;
+          this.cargando = false;
+        }).catch(()=>{
+          this.cargando = false
+        })
+      },
+      loadProjector(){
+        let uri = '/projector/'+this.id
+        this.cargando = true;
+        this.$axios.get(uri).then(res=>{
+          this.projector = res.data.data;
           this.cargando = false;
         }).catch(()=>{
           this.cargando = false
@@ -431,6 +444,7 @@ export default {
     // this.loadActivities();
     this.loadSchedule();
     this.loadData();
+    this.loadProjector();
   },
 };
 </script>

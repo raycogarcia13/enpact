@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { get ,all, find,
         store, update, remove, 
-        setProjectors, removeProjectors, myServices
+        setProjectors, removeProjectors, myServices, servicesUser
      } = require('../controllers/serviceController')
 
 const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth")
@@ -12,6 +12,7 @@ const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth")
 router.get('/services',isAuthenticatedUser, get);
 router.get('/services_all',isAuthenticatedUser,authorizeRoles('CTJefe'), all);
 router.get('/my_services',isAuthenticatedUser, myServices);
+router.get('/admin_services/:id',isAuthenticatedUser, servicesUser);
 router.get('/services/:id',isAuthenticatedUser, find);
 router.post('/services',isAuthenticatedUser, authorizeRoles('CTJefe'),store);
 router.put('/services/:id',isAuthenticatedUser,authorizeRoles('CTJefe'), update);

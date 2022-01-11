@@ -1,11 +1,12 @@
 const Department = require('../models/department');
+const Leader = require('../models/leaders');
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middlewares/catchAsyncErrors")
 const asyncForEach = require('../utils/asyncForEach')
 
 // get departments  => /api/v1/department
 exports.all = catchAsyncErrors(async (req,res,next) =>{
-    let all = await Department.find();
+    let all = await Department.find().populate('leader');
     res.json({
         status:"success",
         count: all.length,
@@ -57,3 +58,11 @@ exports.update = catchAsyncErrors(async (req,res,next) =>{
     })
 })
 
+// get get leaders  => /api/v1/leader
+exports.getLeader = catchAsyncErrors(async (req,res,next) =>{
+    data = await Leader.find();
+    res.json({
+        status:"success",
+        data
+    })
+})

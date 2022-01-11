@@ -27,6 +27,7 @@ export default  {
         state.auth = false;
         state.user = null;
         localStorageUtil.clear('user');
+        localStorageUtil.clear('token');
       },
       initApp({state}){
           let user = localStorageUtil.getSecure('user');
