@@ -121,8 +121,8 @@ export default {
 
     },
     beforeMount() {
-        // if(!this.auth || !this.$hasRole('CTJefe') || !this.$hasRole('CTRHH'))
-            // return this.$router.push('/')
+        if(!this.auth || !this.$hasRole('CTJefe') || !this.$hasRole('CTRHH'))
+            return this.$router.push('/')
     
     }
 }
