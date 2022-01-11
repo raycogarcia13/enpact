@@ -122,7 +122,7 @@ export default {
     },
     beforeMount() {
         if(!this.auth || !this.$hasRole('CTJefe') || !this.$hasRole('CTRHH'))
-            return this.$router.push('/login')
+            return this.$router.push('/')
     
     }
 }
