@@ -69,7 +69,7 @@ export default {
         }
     },
     beforeMount() {
-        if(!this.auth || !this.$hasRole('CTProyectista'))
+        if(!this.auth )
             return this.$router.push('/login')
         
     } 

@@ -5,7 +5,7 @@ const { login, login2, logout, refreshUser } = require('../controllers/authContr
 
 const { isAuthenticatedUser, authorizeRoles } = require("../middlewares/auth")
 
-router.post('/login', login2);
+router.post('/login', login);
 router.post('/logout', isAuthenticatedUser, logout);
 router.get('/refreshUser',isAuthenticatedUser, authorizeRoles('CTJefe'), refreshUser);
 
