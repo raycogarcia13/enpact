@@ -29,6 +29,7 @@
                 autocomplete="false"
                 label="Contraseña"
                 append-icon="mdi-lock"
+                v-on:keyup.enter="sendLogin"
               ></v-text-field>
 
                <v-alert
@@ -47,7 +48,7 @@
             <v-divider v-if="!$vuetify.breakpoint.mobile" ></v-divider>
             <v-card-actions class="pa-5">
               <v-spacer></v-spacer>
-                <v-btn rounded color="primary" :block="$vuetify.breakpoint.mobile" @click="sendLogin">
+                <v-btn rounded color="primary" :block="$vuetify.breakpoint.mobile"  @click="sendLogin">
                   Entrar
                 </v-btn>
               <v-spacer></v-spacer>
