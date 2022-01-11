@@ -121,7 +121,7 @@ export default {
 
     },
     beforeMount() {
-        if(!this.auth || !this.$hasRole('CTJefe') || !this.$hasRole('CTRHH'))
+        if((!this.auth && !this.$hasRole('CTJefe')) || (!this.auth && !this.$hasRole('CTRHH')))
             return this.$router.push('/login')
     
     }
