@@ -58,12 +58,12 @@ exports.login2 =  catchAsyncErrors(async (req,res,next) =>{
     if(!username || !password)
         return next(new ErrorHandler('auth.empty',400))
     
-    const roles = ['Administradores'];
+    const roles = ['CTJefe'];
     const projector = await Projector.findOne({username});
 
     const user = {
         user:username,
-        email:'geomatica@enpa.iju.minag.cu',
+        email:'desarrollo@enpa.iju.minag.cu',
         name:'Rayco García Fernández',
         projector,
         roles,

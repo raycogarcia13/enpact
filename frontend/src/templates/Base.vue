@@ -121,7 +121,7 @@ export default {
 
     },
     beforeMount() {
-        if(!this.auth || !this.$hasRole('CTJefe') || !this.$hasRole('CTRHH'))
+        if(!this.admin)
             return this.$router.push('/')
     
     }
